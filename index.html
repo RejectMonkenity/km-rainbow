@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainbow Text Generator</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-color: #2d2d2d;
+            --text-color: #ffffff;
+            --accent-color: #007bff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #aaa;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            background-color: #404040;
+            border: 1px solid #555;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        textarea:focus {
+            outline: 2px solid var(--accent-color);
+            border-color: transparent;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: #404040;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .output-section {
+            background-color: #222;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+
+        .preview {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            min-height: 27px;
+            word-wrap: break-word;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Color Preview Classes */
+        .c-red { color: #ff5555; }
+        .c-yellow { color: #ffff55; }
+        .c-green { color: #55ff55; }
+        .c-blue { color: #5555ff; }
+        .c-purple { color: #ff55ff; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Rainbow Text Generator</h1>
+
+    <label for="input-text">Type your text here:</label>
+    <textarea id="input-text" placeholder="Type something...">Hello World!</textarea>
+
+    <label>Output Format:</label>
+    <div class="controls">
+        <label class="radio-group">
+            <input type="radio" name="format" value="game" checked> 
+            Game Chat (&lt;color=red&gt;)
+        </label>
+        <label class="radio-group">
+            <input type="radio" name="format" value="html"> 
+            HTML Code (&lt;span...&gt;)
+        </label>
+    </div>
+
+    <label>Visual Preview:</label>
+    <div class="output-section">
+        <div id="preview-box" class="preview"></div>
+    </div>
+
+    <label style="margin-top: 20px;">Copy this code:</label>
+    <textarea id="output-code" readonly style="font-family: monospace; color: #8fecff;"></textarea>
+
+    <button id="copy-btn">Copy to Clipboard</button>
+</div>
+
+<script>
+    const inputText = document.getElementById('input-text');
+    const outputCode = document.getElementById('output-code');
+    const previewBox = document.getElementById('preview-box');
+    const copyBtn = document.getElementById('copy-btn');
+    const formatRadios = document.getElementsByName('format');
+
+    const colors = ['red', 'yellow', 'green', 'blue', 'purple'];
+
+    function generateRainbow() {
+        // If the box is empty, clear the output and return
+        if (!inputText.value) {
+            outputCode.value = "";
+            previewBox.innerHTML = "";
+            return;
+        }
+
+        const text = inputText.value;
+        const format = document.querySelector('input[name="format"]:checked').value;
+        
+        let result = "";
+        let previewHtml = "";
+        let colorIndex = 0;
+
+        for (let char of text) {
+            if (char === ' ') {
+                result += ' ';
+                previewHtml += ' ';
+            } else {
+                const color = colors[colorIndex % colors.length];
+                
+                if (format === 'game') {
+                    result += `<color=${color}>${char}`;
+                } else {
+                    result += `<span style="color:${color}">${char}</span>`;
+                }
+
+                previewHtml += `<span class="c-${color}">${char}</span>`;
+                
+                colorIndex++;
+            }
+        }
+
+        outputCode.value = result;
+        previewBox.innerHTML = previewHtml;
+    }
+
+    function copyToClipboard() {
+        if (!outputCode.value) return; // Don't copy if empty
+        
+        outputCode.select();
+        outputCode.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(outputCode.value).then(() => {
+            const originalText = copyBtn.innerText;
+            copyBtn.innerText = "Copied!";
+            copyBtn.style.backgroundColor = "#28a745";
+            setTimeout(() => {
+                copyBtn.innerText = originalText;
+                copyBtn.style.backgroundColor = "";
+            }, 2000);
+        });
+    }
+
+    // Event Listeners
+    inputText.addEventListener('input', generateRainbow);
+    formatRadios.forEach(radio => radio.addEventListener('change', generateRainbow));
+    copyBtn.addEventListener('click', copyToClipboard);
+
+    // Change 2: Run the function immediately so "Hello World!" is colored on load
+    generateRainbow();
+
+</script>
+
+</body>
+</html>
